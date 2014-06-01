@@ -2,8 +2,9 @@
   (:gen-class)
   (:require [clojure.core.async :as async :refer [<! >! <!! >!! timeout chan alt! alts!! go]]
             [clojure.tools.cli :as cli]
+            [taoensso.timbre :as timbre]
             [beckon :as b]
-            [potemkin :as p]
+            [potemkin :as pot]
             [clj-time.core :as t]
             [clj-time.coerce :as c]
             [clojure.java.io :as io]
@@ -15,6 +16,7 @@
             [aleph.http :as h]
             [gloss.core :as g]
             [gloss.io :as gio]))
+(timbre/refer-timbre)
 
 (def frame-codec (let [int-ascii (g/string-integer :ascii :length 4)
                        int-ascii-with-space-suffix (g/string-integer :ascii :length 4 :suffix \ )
@@ -37,31 +39,30 @@
                        proto-frame [(g/string :ascii :delimiters [" "]) (g/repeated :byte :prefix int-ascii)]]
                    (g/compile-frame proto-frame trf-input-before-encoding trf-output-after-decoding)))
 
-(defn start-chat-server [server-host server-port]
-  (let [clients (agent {})
+(defnp start-chat-server [server-host server-port]
+  (let [clients (atom {})
         count-words #(count (re-seq #"[^ ]+" %))
-        terminate-connections #(doseq [[name ch] @clients] (l/enqueue-and-close ch [:bye " "]))
         server-handler (fn [ch client-info]
                          (l/receive-all ch
                                         (let [my-name (atom nil)]
-                                          (fn [[cmd {:keys [to message name]} :as data]]
+                                          (fn [[cmd {:keys [to message name]}]]
                                             (case cmd
                                               :reg (when-not @my-name
                                                      (reset! my-name name)
-                                                     (send-off clients (fn [clients-map]
-                                                                         (assoc clients-map name ch))))
+                                                     (swap! clients assoc name ch))
                                               :snd (if-let [to-chan (@clients to)]
                                                      (l/enqueue to-chan [:rcv {:from @my-name :message message
                                                                                :word-count (count-words message)}])))))))]
     (println (str "starting server on port " server-port))
     (tcp/start-tcp-server server-handler {:host server-host :port server-port :frame frame-codec :name "Sunil's Clojure chat-server"})
     (reset! (b/signal-atom "INT") #{#(do (println :handling-sigint)
-                                         (terminate-connections)
+                                         (doseq [[name ch] @clients] (l/enqueue-and-close ch [:bye " "]))
                                          (b/raise! "TERM"))})))
 
 (let [cli-options [["-p" "--port PORT" "Port number" :default 5000 :parse-fn #(Integer/parseInt %)
                     :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]
+                   ["-H" "--host HOST" "hostname " :default "0.0.0.0"]
                    ["-h"    "--help" "show help"]]]
   (defn -main [& args]
-    (let [{{:keys [port help] :as options} :options summary :summary} (cli/parse-opts args cli-options)]
+    (let [{{:keys [host port help] :as options} :options summary :summary} (cli/parse-opts args cli-options)]
       (start-chat-server host port))))
