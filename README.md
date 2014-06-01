@@ -20,11 +20,13 @@ Examples
 Client -> Server
 
 REG 0008 CHIRAYU
+
 SND 0018 VENKY HELLO WORLD
 
 Server -> Client
 
 RCV 0025 CHIRAYU 0002 HELLO WORLD
+
 BYE 0000
 
 
