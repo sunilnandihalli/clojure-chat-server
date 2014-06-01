@@ -41,6 +41,26 @@ lein uberjar
     # this opens a number of connections and sends messages to the server running on port 5000
     ./test-chat-server
 
+#### sample test output
+#!/bin/bash -v
+go run ./chirayu-tester.go -clients=100 -burst_interval=100 -burst=100 -port=5000 -server=localhost -duration=1000 -wait=10000
+2014/06/02 02:02:42 ---------------
+2014/06/02 02:02:42 server: localhost
+2014/06/02 02:02:42 port: 5000
+2014/06/02 02:02:42 clients: 100
+2014/06/02 02:02:42 duration: 1000
+2014/06/02 02:02:42 final wait: 10000
+2014/06/02 02:02:42 burst: 100
+2014/06/02 02:02:42 burst interval: 100
+2014/06/02 02:02:42 ---------------
+2014/06/02 02:02:43 Started Testlets 100
+2014/06/02 02:02:44 Tx 58919 in 1000 ms
+2014/06/02 02:02:44 Rx 366 in 1000 ms
+2014/06/02 02:02:44 ---------------
+2014/06/02 02:02:44 Waiting to check for message loss 10000 ms
+2014/06/02 02:02:54 Final Tx 58920
+2014/06/02 02:02:54 Final Rx 27625
+2014/06/02 02:02:54 Message Loss 31295
 
 
 ## License
