@@ -43,7 +43,7 @@ lein uberjar
 
 #### sample test output
 
-#!/bin/bash -v
+The following output says that the tester is going to make 100 connections to the server on localhost:5000 start 100 clients and then send about 100 messages to the server every 100 milli-seconds and then wait for 1000 ms to see how many of the messages come-back and report the loss in number of messages and finally wait for 10 seconds to see how many messages successfully made a round trip in 10 seconds. The following output is saying that of the 58919 messages sent only about 366 made it back within 1 second and only about 27625 messages made it back in 10 seconds. This clearly can't be what clojure can deliver! .. I think there is some problem with the way I am doing things.. 
 
 go run ./chirayu-tester.go -clients=100 -burst_interval=100 -burst=100 -port=5000 -server=localhost -duration=1000 -wait=10000
 
