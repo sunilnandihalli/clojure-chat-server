@@ -1,2 +1,2 @@
 #!/bin/bash -v
-go run ./chirayu-tester.go -clients=100 -burst_interval=100 -burst=100 -port=5000 -server=localhost -duration=1000 -wait=100000
+go run ./chirayu-tester.go -clients=100 -burst_interval=100 -burst=100 -port=5000 -server=localhost -duration=1000 -wait=10000

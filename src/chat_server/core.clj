@@ -54,21 +54,22 @@
                                             (case cmd
                                               :reg (if-not @my-name
                                                      (do
-                                                       (l/enqueue message-chan [:registered name])
+                                                       ;(l/enqueue message-chan [:registered name])
                                                        (reset! my-name name)
-                                                       (send clients (fn [clients-map]
-                                                                       (l/enqueue message-chan [:clients-map-updated
-                                                                                                :clients-count (count clients-map)
-                                                                                                :name name])
-                                                                       (assoc clients-map name ch))))
-                                                     (l/enqueue error-chan [:my-name @my-name :reg-request-ignored name]))
-                                              :snd (if-not @my-name (l/enqueue ch [:rcv {:from "chat-server" :word-count 4
-                                                                                         :message "please register before messaging"}])
+                                                       (send-off clients (fn [clients-map]
+                                                                           #_(l/enqueue message-chan [:clients-map-updated
+                                                                                                      :clients-count (count clients-map)
+                                                                                                      :name name])
+                                                                           (assoc clients-map name ch))))
+                                                     ;(l/enqueue error-chan [:my-name @my-name :reg-request-ignored name])
+                                                     )
+                                              :snd (if-not @my-name (comment (l/enqueue ch [:rcv {:from "chat-server" :word-count 4
+                                                                                          :message "please register before messaging"}]))
                                                            (if-let [to-chan (or (@clients to) (if (= my-name to) ch))]
                                                              (l/enqueue to-chan [:rcv {:from @my-name :message message
                                                                                        :word-count (count-words message)}])
-                                                             (l/enqueue error-chan [:from @my-name :user-not-registered to
-                                                                                    :message-not-sent message]))))))))]
+                                                             (comment (l/enqueue error-chan [:from @my-name :user-not-registered to
+                                                                                     :message-not-sent message])))))))))]
     (println (str "starting server on port " server-port))
     (tcp/start-tcp-server server-handler {:host server-host :port server-port :frame frame-codec :name "Sunil's Clojure chat-server"})
     (reset! (b/signal-atom "INT") #{#(do (println :handling-sigint)
