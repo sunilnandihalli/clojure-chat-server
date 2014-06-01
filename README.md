@@ -7,8 +7,11 @@ it is delivering no-where near it's maximum capacity
 
 
 REG *ascii 4 bytes*[ *name*]
+
 SND *ascii 4 bytes*[ *name of recipient*][ *msg*]
+
 RCV *ascii 4 bytes*[ *name of sender*][ *ascii 4 bytes word count*][ *msg*]
+
 
 BYE 0000
 
